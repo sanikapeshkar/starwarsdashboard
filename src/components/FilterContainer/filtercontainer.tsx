@@ -19,7 +19,7 @@ const crewOptions = ["Any", "1", "2-4", "5-10", "11-100", "100+"];
 export default function FiltersCard() {
   const [_, setStarships] = useAtom(starShips);
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 400); // 400ms debounce
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 400); 
 
   const [hyperdrive, setHyperdrive] = useState("Any");
   const [crew, setCrew] = useState("Any");

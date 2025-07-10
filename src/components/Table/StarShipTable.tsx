@@ -60,7 +60,6 @@ export const StarShipTable = () => {
     },
   ];
 
-  // Use the atom state for rendering the table data
   const table = useReactTable({
     data: starshipdata,
     columns,
