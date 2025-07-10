@@ -1,14 +1,15 @@
+import ComparisonGrid from "@/components/ComparisonGrid/ComparisonGrid";
 import FiltersCard from "@/components/FilterContainer/filtercontainer";
+import { Header } from "@/components/Header/header";
+import Pagination from "@/components/Pagination/pagination";
 import { StarShipTable } from "@/components/Table/StarShipTable";
 import TabSwitcher from "@/components/Tabs/tabswitcher";
-import { useQuery } from "@tanstack/react-query";
-import Image from "next/image";
 
 export default function Home() {
   return (
     <>
+      <Header />
       <FiltersCard />
-
       <div className="p-6">
         <TabSwitcher
           tabs={[
@@ -37,14 +38,15 @@ export default function Home() {
               label: "Compare",
               content: (
                 <div className="p-6">
-                  <h1 className="text-2xl font-bold mb-4">Starships</h1>
-                  <StarShipTable />
+                  <h1 className="text-2xl font-bold mb-4">Compare Starships</h1>
+                  <ComparisonGrid starships={[]} />
                 </div>
               ),
             },
           ]}
         />
       </div>
+      <Pagination page={3} totalPages={4} />
     </>
   );
 }
