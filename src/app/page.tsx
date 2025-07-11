@@ -39,14 +39,13 @@ export default function Home() {
               content: (
                 <div className="p-6">
                   <h1 className="text-2xl font-bold mb-4">Compare Starships</h1>
-                  <ComparisonGrid starships={[]} />
+                  <ComparisonGrid />
                 </div>
               ),
             },
           ]}
         />
       </div>
-      <Pagination page={3} totalPages={4} />
     </>
   );
 }

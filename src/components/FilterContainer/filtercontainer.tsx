@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchStarships } from "@/lib/services/starships.service";
 import { useAtom } from "jotai";
-import { starShips } from "@/lib/atoms/starSelection";
+import { starShipsAtom } from "@/lib/atoms/starSelection";
 import { Card ,CardContent, CardHeader, CardTitle} from "../ui/card";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -17,7 +17,7 @@ const hyperdriveOptions = ["Any", "0.5", "1.0", "2.0", "4.0", "10.0"];
 const crewOptions = ["Any", "1", "2-4", "5-10", "11-100", "100+"];
 
 export default function FiltersCard() {
-  const [_, setStarships] = useAtom(starShips);
+  const [_, setStarships] = useAtom(starShipsAtom);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 400); 
 

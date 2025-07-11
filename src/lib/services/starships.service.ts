@@ -26,3 +26,5 @@ export const searchStarships = async (query: string) => {
 
   return data.results;
 };
+
+
