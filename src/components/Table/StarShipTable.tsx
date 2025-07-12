@@ -18,9 +18,15 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { fetchStarships } from "@/lib/services/starships.service";
+import {
+  applyFilters,
+  fetchStarships,
+  searchStarships,
+} from "@/lib/services/starships.service";
 import { useAtom } from "jotai";
 import {
+  filterSettingsAtom,
+  searchTermAtom,
   selectedStarshipsAtom,
   starShipsAtom,
 } from "@/lib/atoms/starSelection";
@@ -30,18 +36,32 @@ export const StarShipTable = () => {
   const [page, setPage] = useState(1);
   const [starshipdata, setStarshipdata] = useAtom(starShipsAtom);
   const [selectedShips, setSelectedShips] = useAtom(selectedStarshipsAtom);
+  const [filter, setfilter] = useAtom(filterSettingsAtom);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [searchTerm] = useAtom(searchTermAtom);
 
   const { data = [], isLoading, error } = useQuery({
-    queryKey: ["starships", page],
-    queryFn: () => fetchStarships(page),
+    queryKey: searchTerm ? ["starships-search", searchTerm] : ["starships", page],
+    queryFn: () => (searchTerm ? searchStarships(searchTerm) : fetchStarships(page)),
+    enabled: !!searchTerm || page > 0,
   });
 
-  useEffect(() => {
-    if (data?.length > 0) {
-      setStarshipdata(data);
-    }
-  }, [data, setStarshipdata]);
+useEffect(() => {
+  if (!Array.isArray(data)) return;
+
+  const filtered = applyFilters(data, {
+    hyperdriveRating: filter.hyperdriveRating,
+    crewSizeRange: filter.crewSizeRange,
+  });
+
+  setStarshipdata((prev) => {
+    const isSame =
+      prev.length === filtered.length &&
+      prev.every((item, index) => item.name === filtered[index]?.name);
+
+    return isSame ? prev : filtered;
+  });
+}, [data, filter.hyperdriveRating, filter.crewSizeRange]);
 
   const handleSelect = (starship: Starship) => {
     setSelectedShips((prev) => {
@@ -60,28 +80,13 @@ export const StarShipTable = () => {
     { accessorKey: "passengers", header: "Passengers" },
     {
       accessorKey: "hyperdrive_rating",
-      header: ({ column }) => {
-        const isSorted = column.getIsSorted();
-        return (
-          <div
-            onClick={() => column.toggleSorting(isSorted === "asc")}
-            className="cursor-pointer select-none flex items-center gap-1"
-          >
-            Hyperdrive
-            {isSorted === "asc" ? (
-              <span>▲</span>
-            ) : isSorted === "desc" ? (
-              <span>▼</span>
-            ) : (
-              <span className="opacity-30">⇅</span>
-            )}
-          </div>
-        );
-      },
+      header: ({ column }) => (
+        <div onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="cursor-pointer select-none flex items-center gap-1">
+          Hyperdrive {column.getIsSorted() === "asc" ? '▲' : column.getIsSorted() === "desc" ? '▼' : '⇅'}
+        </div>
+      ),
       enableSorting: true,
-      sortingFn: (a, b) =>
-        parseFloat(a.getValue("hyperdrive_rating") as string) -
-        parseFloat(b.getValue("hyperdrive_rating") as string),
+      sortingFn: (a, b) => parseFloat(a.getValue("hyperdrive_rating") as string) - parseFloat(b.getValue("hyperdrive_rating") as string),
     },
     {
       id: "actions",
@@ -90,11 +95,7 @@ export const StarShipTable = () => {
         const ship = row.original;
         const isSelected = selectedShips.some((s) => s.name === ship.name);
         return (
-          <Button
-            size="sm"
-            variant={isSelected ? "destructive" : "outline"}
-            onClick={() => handleSelect(ship)}
-          >
+          <Button size="sm" variant={isSelected ? "destructive" : "outline"} onClick={() => handleSelect(ship)}>
             {isSelected ? "Remove" : "Select"}
           </Button>
         );
@@ -113,27 +114,17 @@ export const StarShipTable = () => {
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading starships.</div>;
+  if (data.length === 0 && !isLoading) return <div>No starships found.</div>;
 
   return (
     <div className="rounded-xl border w-full">
       <Table className="table-fixed w-full border border-gray-200 dark:border-gray-700 rounded-xl">
         <TableHeader>
           {table.getHeaderGroups().map((group) => (
-            <TableRow
-              key={group.id}
-              className="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-900 dark:even:bg-gray-800"
-            >
+            <TableRow key={group.id} className="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-900 dark:even:bg-gray-800">
               {group.headers.map((header) => (
-                <TableHead
-                  key={header.id}
-                  className="text-sm truncate whitespace-normal break-words text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800"
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : header.column.columnDef.header &&
-                      header.column.columnDef.header instanceof Function
-                    ? header.column.columnDef.header(header.getContext())
-                    : header.column.columnDef.header}
+                <TableHead key={header.id} className="text-sm truncate whitespace-normal break-words text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800">
+                  {header.isPlaceholder ? null : header.column.columnDef.header instanceof Function ? header.column.columnDef.header(header.getContext()) : header.column.columnDef.header}
                 </TableHead>
               ))}
             </TableRow>
@@ -144,15 +135,8 @@ export const StarShipTable = () => {
           {table.getRowModel().rows.map((row) => (
             <TableRow key={row.id}>
               {row.getVisibleCells().map((cell) => (
-                <TableCell
-                  key={cell.id}
-                  className="text-sm truncate whitespace-normal break-words"
-                >
-                  {cell.column.columnDef.cell
-                    ? cell.column.columnDef.cell instanceof Function
-                      ? cell.column.columnDef.cell(cell.getContext())
-                      : cell.column.columnDef.cell
-                    : cell.getValue()}
+                <TableCell key={cell.id} className="text-sm truncate whitespace-normal break-words">
+                  {cell.column.columnDef.cell ? cell.column.columnDef.cell instanceof Function ? cell.column.columnDef.cell(cell.getContext()) : cell.column.columnDef.cell : cell.getValue()}
                 </TableCell>
               ))}
             </TableRow>
@@ -161,10 +145,7 @@ export const StarShipTable = () => {
       </Table>
 
       <div className="flex justify-between items-center p-4">
-        <Button
-          onClick={() => setPage((old) => Math.max(old - 1, 1))}
-          disabled={page === 1}
-        >
+        <Button onClick={() => setPage((old) => Math.max(old - 1, 1))} disabled={page === 1}>
           Previous
         </Button>
         <span>Page {page}</span>

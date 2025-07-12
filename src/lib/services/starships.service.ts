@@ -4,10 +4,13 @@ import { Starship } from "@/components/StarShipCard/starshipcard.types";
 type StarshipResult={
   url : string
 }
+
 export const fetchStarships = async (page = 1) => {
-  const res = await fetch(`https://swapi.tech/api/starships/?page=${page}`);
+  console.log('search trigerred', page)
+  const res = await fetch(`https://swapi.tech/api/starships/?page=${page}&limit=10`);
   if (!res.ok) throw new Error("Failed to fetch starships");
 
+  console.log('service called',page);
   const data = await res.json();
 
   const starships = await Promise.all(
@@ -22,6 +25,8 @@ export const fetchStarships = async (page = 1) => {
 };
 
 export const searchStarships = async (query: string) => {
+
+  console.log('search trigerred', query)
   if (!query) return [];
   const url =
     query && query.trim() !== ""

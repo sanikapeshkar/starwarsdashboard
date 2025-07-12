@@ -3,8 +3,8 @@ import { atom } from "jotai";
 
 export const selectedStarshipsAtom = atom<Starship[]>([]);
 export const starShipsAtom = atom<Starship[]>([]);
-
+export const searchTermAtom = atom<string>("");
 export const filterSettingsAtom = atom({
-  hyperdriveRating: 0,
-  crewSizeRange: [0, Infinity] as [number, number] | number,
+  hyperdriveRating: "Any",
+  crewSizeRange: "Any",
 });
