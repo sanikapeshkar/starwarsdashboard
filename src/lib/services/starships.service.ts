@@ -1,5 +1,9 @@
 import { Starship } from "@/components/StarShipCard/starshipcard.types";
 
+
+type StarshipResult={
+  url : string
+}
 export const fetchStarships = async (page = 1) => {
   const res = await fetch(`https://swapi.tech/api/starships/?page=${page}`);
   if (!res.ok) throw new Error("Failed to fetch starships");
@@ -7,7 +11,7 @@ export const fetchStarships = async (page = 1) => {
   const data = await res.json();
 
   const starships = await Promise.all(
-    data.results.map(async (result: any) => {
+    data.results.map(async (result: StarshipResult) => {
       const res = await fetch(result.url);
       const shipData = await res.json();
       return shipData.result.properties;
