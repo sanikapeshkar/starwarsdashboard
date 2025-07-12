@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 Starship Comparison App
 
-## Getting Started
+Compare your favorite starships from the Star Wars universe!  
+This web app allows users to **search**, **filter**, **sort**, and **compare up to 3 starships** side by side in a clean, responsive interface.
 
-First, run the development server:
+---
+
+## 🖼️ Preview
+<img width="1868" height="917" alt="image" src="https://github.com/user-attachments/assets/a8364b4f-32d3-46b5-bcd5-d3ad685e16f2" />
+
+
+---
+
+## 🔧 Tech Stack
+
+- **Framework:** Next.js 15 (App Router)
+- **State Management:** [Jotai](https://jotai.org/)
+- **Server State:** [React Query (TanStack Query)](https://tanstack.com/query/v4)
+- **Table Management:** [TanStack Table v8](https://tanstack.com/table)
+- **UI Kit:** [ShadCN UI](https://ui.shadcn.dev/)
+- **Styling:** Tailwind CSS
+- **Notifications:** [Sonner Toasts](https://sonner.emilkowal.ski/)
+- **API Layer:** `ts-rest` contract-based services
+
+---
+
+## ✨ Features
+
+✅ Search starships with live query  
+✅ Pagination & sorting  
+✅ Filter by crew size and hyperdrive rating  
+✅ Select & compare up to 3 starships  
+✅ Responsive UI with dark mode  
+✅ Optimistic updates with React Query  
+✅ Persist selected ships using Jotai  
+✅ Glassmorphic headers for modern feel  
+
+---
+
+## 📦 Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+git clone https://github.com/your-username/starship-comparator.git
+cd starship-comparator
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> You can use `npm` or `yarn` if you're not using `pnpm`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Project Structure
 
-## Learn More
+```
+├── app/
+│   ├── page.tsx                # Main page using the table
+│   └── layout.tsx              # Global layout and theming
+├── components/
+│   ├── StarshipTable/          # Table logic with sorting/filtering
+│   ├── ComparisonGridModal/    # Modal for comparing selected ships
+│   ├── StarshipCard/           # Card for each starship in the modal
+│   └── ui/                     # ShadCN components
+├── lib/
+│   ├── atoms/                  # Jotai atoms for state
+│   ├── services/               # ts-rest API service logic
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🧠 Development Tips
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- To **add new filters**, update `filterSettingsAtom` and extend `applyFilters()`.
+- To **customize comparison**, update `StarshipCard` with more fields.
+- **Pagination** is handled via React Query’s `useQuery` with `page` state.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🧪 Future Enhancements
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- ⏳ Add debounce to search bar  
+- ⏳ Add favorites/bookmarks feature  
+- ⏳ Add starship images  
+- ⏳ Add unit and integration tests
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!  
+Feel free to fork the repo and submit a PR.
+
+---
+
+## 📄 License
+
+MIT © 2025 — [Your Name](https://github.com/your-username)
