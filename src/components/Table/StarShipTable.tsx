@@ -34,15 +34,19 @@ import {
 import { Starship } from "./starshiptable.types";
 import { toast } from "sonner";
 import { ComparisonGridModal } from "../ComparisonGridModal/comparisonGridModal";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useUrlSync } from "@/lib/utils/urlsync";
 
 export const StarShipTable = () => {
-  const [page, setPage] = useState(1);
   const [starshipdata, setStarshipdata] = useAtom(starShipsAtom);
   const [selectedShips, setSelectedShips] = useAtom(selectedStarshipsAtom);
   const [filter] = useAtom(filterSettingsAtom);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [searchTerm] = useAtom(searchTermAtom);
   const [, setcomparisonModal] = useAtom(comparisonmodal);
+  const { getParam, setParams } = useUrlSync();
+
+  const [page, setPage] = useState(Number(getParam("page")) || 1);
   const { data = [], isLoading, error } = useQuery({
     queryKey: searchTerm
       ? ["starships-search", searchTerm]
@@ -68,6 +72,11 @@ export const StarShipTable = () => {
       return isSame ? prev : filtered;
     });
   }, [data, filter.hyperdriveRating, filter.crewSizeRange]);
+
+  useEffect(() => {
+    const currentPage = Number(getParam("page")) || 1;
+    setPage(currentPage);
+  }, []);
 
   const handleSelect = (starship: Starship) => {
     const isSelected = selectedShips.some((s) => s.name === starship.name);
@@ -129,6 +138,10 @@ export const StarShipTable = () => {
     },
   ];
 
+  const updatePage = (newPage: number) => {
+    setPage(newPage);
+    setParams({ page: newPage });
+  };
   const table = useReactTable({
     data: starshipdata,
     columns,
@@ -144,29 +157,19 @@ export const StarShipTable = () => {
 
   return (
     <>
-      <div className="rounded-xl border w-full">
-        <Table className="table-fixed w-full border border-gray-200 dark:border-gray-700 rounded-xl">
-          <TableHeader>
-            {table.getHeaderGroups().map((group) => (
-              <TableRow
-                key={group.id}
-                className="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-900 dark:even:bg-gray-800"
-              >
-                {group.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="text-sm truncate whitespace-normal break-words text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800"
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : header.column.columnDef.header instanceof Function
-                      ? header.column.columnDef.header(header.getContext())
-                      : header.column.columnDef.header}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
+    <div className="rounded-xl border w-full">
+      <Table className="table-fixed w-full border border-gray-200 dark:border-gray-700 rounded-xl">
+        <TableHeader>
+          {table.getHeaderGroups().map((group) => (
+            <TableRow key={group.id} className="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-900 dark:even:bg-gray-800">
+              {group.headers.map((header) => (
+                <TableHead key={header.id} className="text-sm truncate whitespace-normal break-words text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800">
+                  {header.isPlaceholder ? null : header.column.columnDef.header instanceof Function ? header.column.columnDef.header(header.getContext()) : header.column.columnDef.header}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
 
           <TableBody>
             {table.getRowModel().rows.map((row) => (
@@ -204,13 +207,15 @@ export const StarShipTable = () => {
 
         <div className="flex justify-between items-center p-4">
           <Button
-            onClick={() => setPage((old) => Math.max(old - 1, 1))}
+            onClick={() => updatePage(Math.max(page - 1, 1))}
             disabled={page === 1}
           >
             Previous
           </Button>
           <span>Page {page}</span>
-          <Button onClick={() => setPage((old) => old + 1)}>Next</Button>
+          <Button onClick={() => updatePage(page +1)}>
+            Next
+          </Button>
         </div>
       </div>
       <ComparisonGridModal />
