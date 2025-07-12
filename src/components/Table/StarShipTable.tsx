@@ -34,7 +34,6 @@ import {
 import { Starship } from "./starshiptable.types";
 import { toast } from "sonner";
 import { ComparisonGridModal } from "../ComparisonGridModal/comparisonGridModal";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useUrlSync } from "@/lib/utils/urlsync";
 
 export const StarShipTable = () => {
