@@ -15,7 +15,7 @@ export default function TabSwitcher({ tabs, onTabChange }: TabSwitcherProps) {
 
   return (
     <Tabs value={activeTab} onValueChange={handleChange} className="w-full">
-      <TabsList className="mb-4">
+      <TabsList className="mx-4">
         {tabs.map((tab) => (
           <TabsTrigger key={tab.value} value={tab.value}>
             {tab.label}
