@@ -1,7 +1,7 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { TabSwitcherProps } from "./tabs.types";
 
 
