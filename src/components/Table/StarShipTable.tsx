@@ -36,7 +36,7 @@ export const StarShipTable = () => {
   const [page, setPage] = useState(1);
   const [starshipdata, setStarshipdata] = useAtom(starShipsAtom);
   const [selectedShips, setSelectedShips] = useAtom(selectedStarshipsAtom);
-  const [filter, setfilter] = useAtom(filterSettingsAtom);
+  const [filter] = useAtom(filterSettingsAtom);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [searchTerm] = useAtom(searchTermAtom);
 

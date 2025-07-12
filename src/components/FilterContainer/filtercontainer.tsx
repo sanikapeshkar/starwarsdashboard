@@ -1,17 +1,9 @@
 "use client";
 
-import { useDebounce } from "use-debounce";
-import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  applyFilters,
-  searchStarships,
-} from "@/lib/services/starships.service";
 import { useAtom } from "jotai";
 import {
   filterSettingsAtom,
   searchTermAtom,
-  starShipsAtom,
 } from "@/lib/atoms/starSelection";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
