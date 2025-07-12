@@ -8,3 +8,4 @@ export const filterSettingsAtom = atom({
   hyperdriveRating: "Any",
   crewSizeRange: "Any",
 });
+export const comparisonmodal =atom(false)

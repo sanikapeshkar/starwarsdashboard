@@ -8,7 +8,6 @@ export default function Home() {
   return (
     <>
       <Header />
-     
       <div className="p-2">
         <TabSwitcher
           tabs={[
@@ -18,7 +17,7 @@ export default function Home() {
               content: (
                 <div className="px-8 py-4 ">
                   <h1 className="text-2xl font-bold mb-4">Starships</h1>
-                   <FiltersCard />
+                  <FiltersCard />
                   <StarShipTable />
                 </div>
               ),
