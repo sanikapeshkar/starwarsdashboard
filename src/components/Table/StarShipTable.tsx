@@ -96,8 +96,8 @@ export const StarShipTable = () => {
               key={group.id}
               className="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-900 dark:even:bg-gray-800"
             >
-              {group.headers.map((header) => (
-                <TableHead className="text-sm truncate whitespace-normal break-words text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800">
+              {group.headers.map((header,i) => (
+                <TableHead key={`header-${i}`} className="text-sm truncate whitespace-normal break-words text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800">
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()
