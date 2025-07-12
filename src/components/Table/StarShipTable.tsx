@@ -3,8 +3,9 @@
 import {
   useReactTable,
   getCoreRowModel,
-  flexRender,
+  getSortedRowModel,
   ColumnDef,
+  SortingState,
 } from "@tanstack/react-table";
 import { useState, useEffect } from "react";
 import {
@@ -15,9 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Button } from "@/components/ui/button";
-import { Starship } from "./starshiptable.types";
 import { useQuery } from "@tanstack/react-query";
 import { fetchStarships } from "@/lib/services/starships.service";
 import { useAtom } from "jotai";
@@ -25,11 +24,13 @@ import {
   selectedStarshipsAtom,
   starShipsAtom,
 } from "@/lib/atoms/starSelection";
+import { Starship } from "./starshiptable.types";
 
 export const StarShipTable = () => {
   const [page, setPage] = useState(1);
   const [starshipdata, setStarshipdata] = useAtom(starShipsAtom);
   const [selectedShips, setSelectedShips] = useAtom(selectedStarshipsAtom);
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const { data = [], isLoading, error } = useQuery({
     queryKey: ["starships", page],
@@ -37,18 +38,18 @@ export const StarShipTable = () => {
   });
 
   useEffect(() => {
-    if (data && data.length > 0) {
+    if (data?.length > 0) {
       setStarshipdata(data);
     }
   }, [data, setStarshipdata]);
 
   const handleSelect = (starship: Starship) => {
-    const isSelected = selectedShips.some((s) => s.name === starship.name);
-    if (isSelected) {
-      setSelectedShips(selectedShips.filter((s) => s.name !== starship.name));
-    } else {
-      setSelectedShips([...selectedShips, starship]);
-    }
+    setSelectedShips((prev) => {
+      const isSelected = prev.some((s) => s.name === starship.name);
+      return isSelected
+        ? prev.filter((s) => s.name !== starship.name)
+        : [...prev, starship];
+    });
   };
 
   const columns: ColumnDef<Starship>[] = [
@@ -57,14 +58,37 @@ export const StarShipTable = () => {
     { accessorKey: "manufacturer", header: "Manufacturer" },
     { accessorKey: "crew", header: "Crew" },
     { accessorKey: "passengers", header: "Passengers" },
-    { accessorKey: "hyperdrive_rating", header: "Hyperdrive" },
+    {
+      accessorKey: "hyperdrive_rating",
+      header: ({ column }) => {
+        const isSorted = column.getIsSorted();
+        return (
+          <div
+            onClick={() => column.toggleSorting(isSorted === "asc")}
+            className="cursor-pointer select-none flex items-center gap-1"
+          >
+            Hyperdrive
+            {isSorted === "asc" ? (
+              <span>▲</span>
+            ) : isSorted === "desc" ? (
+              <span>▼</span>
+            ) : (
+              <span className="opacity-30">⇅</span>
+            )}
+          </div>
+        );
+      },
+      enableSorting: true,
+      sortingFn: (a, b) =>
+        parseFloat(a.getValue("hyperdrive_rating") as string) -
+        parseFloat(b.getValue("hyperdrive_rating") as string),
+    },
     {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => {
         const ship = row.original;
         const isSelected = selectedShips.some((s) => s.name === ship.name);
-
         return (
           <Button
             size="sm"
@@ -81,7 +105,10 @@ export const StarShipTable = () => {
   const table = useReactTable({
     data: starshipdata,
     columns,
+    state: { sorting },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   if (isLoading) return <div>Loading...</div>;
@@ -97,11 +124,16 @@ export const StarShipTable = () => {
               className="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-900 dark:even:bg-gray-800"
             >
               {group.headers.map((header) => (
-                <TableHead className="text-sm truncate whitespace-normal break-words text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800">
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
+                <TableHead
+                  key={header.id}
+                  className="text-sm truncate whitespace-normal break-words text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800"
+                >
+                  {header.isPlaceholder
+                    ? null
+                    : header.column.columnDef.header &&
+                      header.column.columnDef.header instanceof Function
+                    ? header.column.columnDef.header(header.getContext())
+                    : header.column.columnDef.header}
                 </TableHead>
               ))}
             </TableRow>
@@ -116,7 +148,11 @@ export const StarShipTable = () => {
                   key={cell.id}
                   className="text-sm truncate whitespace-normal break-words"
                 >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  {cell.column.columnDef.cell
+                    ? cell.column.columnDef.cell instanceof Function
+                      ? cell.column.columnDef.cell(cell.getContext())
+                      : cell.column.columnDef.cell
+                    : cell.getValue()}
                 </TableCell>
               ))}
             </TableRow>
