@@ -21,11 +21,15 @@ import { Starship } from "./starshiptable.types";
 import { useQuery } from "@tanstack/react-query";
 import { fetchStarships } from "@/lib/services/starships.service";
 import { useAtom } from "jotai";
-import { starShips } from "@/lib/atoms/starSelection";
+import {
+  selectedStarshipsAtom,
+  starShipsAtom,
+} from "@/lib/atoms/starSelection";
 
 export const StarShipTable = () => {
   const [page, setPage] = useState(1);
-  const [starshipdata, setStarshipdata] = useAtom(starShips);
+  const [starshipdata, setStarshipdata] = useAtom(starShipsAtom);
+  const [selectedShips, setSelectedShips] = useAtom(selectedStarshipsAtom);
 
   const { data = [], isLoading, error } = useQuery({
     queryKey: ["starships", page],
@@ -36,7 +40,17 @@ export const StarShipTable = () => {
     if (data && data.length > 0) {
       setStarshipdata(data);
     }
-  }, [data]);
+  }, [data, setStarshipdata]);
+
+const handleSelect = (starship: Starship) => {
+  const isSelected = selectedShips.some((s) => s.name === starship.name);
+  if (isSelected) {
+    setSelectedShips(selectedShips.filter((s) => s.name !== starship.name));
+  } else {
+    setSelectedShips([...selectedShips, starship]);
+  }
+};
+
 
   const columns: ColumnDef<Starship>[] = [
     { accessorKey: "name", header: "Name" },
@@ -48,15 +62,20 @@ export const StarShipTable = () => {
     {
       id: "actions",
       header: "Actions",
-      cell: ({ row }) => (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => alert(`Viewing ${row.original.name}`)}
-        >
-          Select
-        </Button>
-      ),
+      cell: ({ row }) => {
+        const ship = row.original;
+        const isSelected = selectedShips.some((s) => s.name === ship.name);
+
+        return (
+          <Button
+            size="sm"
+            variant={isSelected ? "destructive" : "outline"}
+            onClick={() => handleSelect(ship)}
+          >
+            {isSelected ? "Remove" : "Select"}
+          </Button>
+        );
+      },
     },
   ];
 
@@ -80,7 +99,10 @@ export const StarShipTable = () => {
                   key={header.id}
                   className="text-sm truncate whitespace-normal break-words"
                 >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
                 </TableHead>
               ))}
             </TableRow>
@@ -104,7 +126,10 @@ export const StarShipTable = () => {
       </Table>
 
       <div className="flex justify-between items-center p-4">
-        <Button onClick={() => setPage((old) => Math.max(old - 1, 1))} disabled={page === 1}>
+        <Button
+          onClick={() => setPage((old) => Math.max(old - 1, 1))}
+          disabled={page === 1}
+        >
           Previous
         </Button>
         <span>Page {page}</span>
