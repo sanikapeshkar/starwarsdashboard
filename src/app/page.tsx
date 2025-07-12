@@ -3,6 +3,7 @@ import FiltersCard from "@/components/FilterContainer/filtercontainer";
 import { Header } from "@/components/Header/header";
 import { StarShipTable } from "@/components/Table/StarShipTable";
 import TabSwitcher from "@/components/Tabs/tabswitcher";
+import { Suspense } from "react";
 
 export default function Home() {
   return (
@@ -18,7 +19,9 @@ export default function Home() {
                 <div className="px-8 py-4 ">
                   <h1 className="text-2xl font-bold mb-4">Starships</h1>
                   <FiltersCard />
-                  <StarShipTable />
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <StarShipTable />
+                  </Suspense>
                 </div>
               ),
             },
