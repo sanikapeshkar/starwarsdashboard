@@ -40,7 +40,6 @@ export default function FiltersCard() {
   });
 
   useEffect(() => {
-
     if (data && Array.isArray(data)) {
       const filtered = applyFilters(data, {
         hyperdriveRating: hyperdrive,
@@ -67,7 +66,7 @@ export default function FiltersCard() {
   }
 
   return (
-    <Card className="m-4 w-[90%] max-w-6xl mx-auto mb-6">
+    <Card className="m-2 w-full max-w-6xl mx-auto mb-6">
       <CardHeader>
         <CardTitle>Search & Filters</CardTitle>
       </CardHeader>

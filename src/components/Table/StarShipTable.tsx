@@ -42,15 +42,14 @@ export const StarShipTable = () => {
     }
   }, [data, setStarshipdata]);
 
-const handleSelect = (starship: Starship) => {
-  const isSelected = selectedShips.some((s) => s.name === starship.name);
-  if (isSelected) {
-    setSelectedShips(selectedShips.filter((s) => s.name !== starship.name));
-  } else {
-    setSelectedShips([...selectedShips, starship]);
-  }
-};
-
+  const handleSelect = (starship: Starship) => {
+    const isSelected = selectedShips.some((s) => s.name === starship.name);
+    if (isSelected) {
+      setSelectedShips(selectedShips.filter((s) => s.name !== starship.name));
+    } else {
+      setSelectedShips([...selectedShips, starship]);
+    }
+  };
 
   const columns: ColumnDef<Starship>[] = [
     { accessorKey: "name", header: "Name" },
@@ -89,16 +88,16 @@ const handleSelect = (starship: Starship) => {
   if (error) return <div>Error loading starships.</div>;
 
   return (
-    <div className="rounded-md border w-full">
-      <Table className="table-fixed w-full">
+    <div className="rounded-xl border w-full">
+      <Table className="table-fixed w-full border border-gray-200 dark:border-gray-700 rounded-xl">
         <TableHeader>
           {table.getHeaderGroups().map((group) => (
-            <TableRow key={group.id}>
+            <TableRow
+              key={group.id}
+              className="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-900 dark:even:bg-gray-800"
+            >
               {group.headers.map((header) => (
-                <TableHead
-                  key={header.id}
-                  className="text-sm truncate whitespace-normal break-words"
-                >
+                <TableHead className="text-sm truncate whitespace-normal break-words text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800">
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()

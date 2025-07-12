@@ -8,26 +8,17 @@ export default function Home() {
   return (
     <>
       <Header />
-      <FiltersCard />
-      <div className="p-6">
+     
+      <div className="p-2">
         <TabSwitcher
           tabs={[
             {
               value: "all",
               label: "All Starships",
               content: (
-                <div className="p-6">
+                <div className="px-8 py-4 ">
                   <h1 className="text-2xl font-bold mb-4">Starships</h1>
-                  <StarShipTable />
-                </div>
-              ),
-            },
-            {
-              value: "favorites",
-              label: "Favorites",
-              content: (
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold mb-4">Starships</h1>
+                   <FiltersCard />
                   <StarShipTable />
                 </div>
               ),
