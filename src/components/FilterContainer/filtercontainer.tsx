@@ -8,7 +8,7 @@ import {
   searchStarships,
 } from "@/lib/services/starships.service";
 import { useAtom } from "jotai";
-import { filterSettingsAtom, starShipsAtom } from "@/lib/atoms/starSelection";
+import { starShipsAtom } from "@/lib/atoms/starSelection";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -23,8 +23,7 @@ import { Button } from "../ui/button";
 import { crewOptions, hyperdriveOptions } from "./filtercontainer.types";
 
 export default function FiltersCard() {
-  const [_, setStarships] = useAtom(starShipsAtom);
-  const [filter, setFilterSettings] = useAtom(filterSettingsAtom);
+  const [, setStarships] = useAtom(starShipsAtom);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 800);
   const [hyperdrive, setHyperdrive] = useState("Any");
