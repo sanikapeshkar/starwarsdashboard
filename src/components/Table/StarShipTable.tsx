@@ -42,7 +42,7 @@ export const StarShipTable = () => {
   const [filter] = useAtom(filterSettingsAtom);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [searchTerm] = useAtom(searchTermAtom);
-  const [_, setcomparisonModal] = useAtom(comparisonmodal);
+  const [, setcomparisonModal] = useAtom(comparisonmodal);
   const { data = [], isLoading, error } = useQuery({
     queryKey: searchTerm
       ? ["starships-search", searchTerm]
