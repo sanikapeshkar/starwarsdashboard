@@ -15,42 +15,54 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Button } from "@/components/ui/button";
 import { Starship } from "./starshiptable.types";
-import { useQuery } from "@tanstack/react-query";
-import { fetchStarships } from "@/lib/services/starships.service";
 import { useAtom } from "jotai";
 import {
   selectedStarshipsAtom,
   starShipsAtom,
 } from "@/lib/atoms/starSelection";
+import { tsRestClient } from "@/lib/services/tsrestClient";
 
 export const StarShipTable = () => {
-  const [page, setPage] = useState(1);
+  const [currentpage, setPage] = useState(4); 
   const [starshipdata, setStarshipdata] = useAtom(starShipsAtom);
   const [selectedShips, setSelectedShips] = useAtom(selectedStarshipsAtom);
-
-  const { data = [], isLoading, error } = useQuery({
-    queryKey: ["starships", page],
-    queryFn: () => fetchStarships(page),
-  });
-
-  useEffect(() => {
-    if (data && data.length > 0) {
-      setStarshipdata(data);
-    }
-  }, [data, setStarshipdata]);
-
-const handleSelect = (starship: Starship) => {
-  const isSelected = selectedShips.some((s) => s.name === starship.name);
-  if (isSelected) {
-    setSelectedShips(selectedShips.filter((s) => s.name !== starship.name));
-  } else {
-    setSelectedShips([...selectedShips, starship]);
+  
+const { data, error, isLoading } = tsRestClient.starships.getStarships.useQuery(
+  ['starships', currentpage], 
+  {
+    query: {
+      currentpage,
+      limit: 10,
+    },
+  },
+  {
+    staleTime: 0, 
   }
-};
+);
 
+console.log(
+  tsRestClient.starships.getStarships.getRequestUrl({
+    query: { page: 3, limit: 10 },
+  })
+);
+  const results = data?.body.results ?? [];
+console.log(data,'from starships table');
+  useEffect(() => {
+    if (results && results.length > 0) {
+      setStarshipdata(results);
+    }
+  }, [results, setStarshipdata]); // Use results in the dependency array
+
+  const handleSelect = (starship: Starship) => {
+    const isSelected = selectedShips.some((s) => s.name === starship.name);
+    if (isSelected) {
+      setSelectedShips(selectedShips.filter((s) => s.name !== starship.name));
+    } else {
+      setSelectedShips([...selectedShips, starship]);
+    }
+  };
 
   const columns: ColumnDef<Starship>[] = [
     { accessorKey: "name", header: "Name" },
@@ -128,11 +140,11 @@ const handleSelect = (starship: Starship) => {
       <div className="flex justify-between items-center p-4">
         <Button
           onClick={() => setPage((old) => Math.max(old - 1, 1))}
-          disabled={page === 1}
+          disabled={currentpage === 1}
         >
           Previous
         </Button>
-        <span>Page {page}</span>
+        <span>Page {currentpage}</span>
         <Button onClick={() => setPage((old) => old + 1)}>Next</Button>
       </div>
     </div>

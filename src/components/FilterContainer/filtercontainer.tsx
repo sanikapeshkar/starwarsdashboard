@@ -1,26 +1,18 @@
 "use client";
 
 import { useDebounce } from "use-debounce";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  applyFilters,
-  searchStarships,
-} from "@/lib/services/starships.service";
+import { applyFilters } from "@/lib/services/starships.service";
 import { useAtom } from "jotai";
 import { filterSettingsAtom, starShipsAtom } from "@/lib/atoms/starSelection";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectValue,
-  SelectItem,
-} from "../ui/select";
+import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "../ui/select";
 import { Button } from "../ui/button";
 import { crewOptions, hyperdriveOptions } from "./filtercontainer.types";
+import { py4eClient } from "@/lib/services/tsrestClient";
 
 export default function FiltersCard() {
   const [_, setStarships] = useAtom(starShipsAtom);
@@ -30,41 +22,52 @@ export default function FiltersCard() {
   const [hyperdrive, setHyperdrive] = useState("Any");
   const [crew, setCrew] = useState("Any");
   const queryClient = useQueryClient();
-  const [clearTrigger, setClearTrigger] = useState(0);
 
-  const { data } = useQuery({
-    queryKey: ["search", debouncedSearchTerm, clearTrigger],
-    queryFn: () => searchStarships(debouncedSearchTerm),
-    staleTime: 0,
-    enabled: true,
-  });
+  const { data, isLoading, isError } = py4eClient.searchStarships.useQuery([
+    {
+      query: {
+        search: debouncedSearchTerm,
+      },
+    },
+  ]);
+
+  const result = data?.body?.results ?? [];
+  
+console.log(result,'from starships filter');
+  const filteredResults = useMemo(() => {
+    return applyFilters(result, {
+      hyperdriveRating: hyperdrive,
+      crewSizeRange: crew,
+    });
+  }, [result, crew, hyperdrive]);
 
   useEffect(() => {
-
-    if (data && Array.isArray(data)) {
-      const filtered = applyFilters(data, {
-        hyperdriveRating: hyperdrive,
-        crewSizeRange: crew,
-      });
-      setStarships(filtered);
+    if (Array.isArray(result)) {
+      setStarships(filteredResults);
     }
-  }, [data, crew, hyperdrive, setStarships]);
+  }, [filteredResults, result]);
 
   const handleClear = () => {
     setSearchTerm("");
     setHyperdrive("Any");
     setCrew("Any");
-    queryClient.invalidateQueries({ queryKey: ["search"] });
-    setClearTrigger((prev) => prev + 1);
+    queryClient.invalidateQueries({ queryKey: ["search", debouncedSearchTerm] });
   };
 
-  function onHyperdriveChange(value: string) {
-    setHyperdrive(value);
-  }
+  const onHyperdriveChange = (value: string) => {
+    if (value !== hyperdrive) {
+      setHyperdrive(value);
+    }
+  };
 
-  function onCrewChange(value: string) {
-    setCrew(value);
-  }
+  const onCrewChange = (value: string) => {
+    if (value !== crew) {
+      setCrew(value);
+    }
+  };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error loading starships.</div>;
 
   return (
     <Card className="m-4 w-[90%] max-w-6xl mx-auto mb-6">
@@ -73,9 +76,7 @@ export default function FiltersCard() {
       </CardHeader>
       <CardContent className="flex gap-4">
         <div className="flex-1">
-          <Label htmlFor="search" className="mb-2">
-            Search
-          </Label>
+          <Label htmlFor="search" className="mb-2">Search</Label>
           <Input
             id="search"
             placeholder="e.g. Millennium Falcon"

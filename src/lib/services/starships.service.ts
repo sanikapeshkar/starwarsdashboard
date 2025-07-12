@@ -1,36 +1,5 @@
 import { Starship } from "@/components/StarShipCard/starshipcard.types";
 
-export const fetchStarships = async (page = 1) => {
-  const res = await fetch(`https://swapi.tech/api/starships/?page=${page}`);
-  if (!res.ok) throw new Error("Failed to fetch starships");
-
-  const data = await res.json();
-
-  const starships = await Promise.all(
-    data.results.map(async (result: any) => {
-      const res = await fetch(result.url);
-      const shipData = await res.json();
-      return shipData.result.properties;
-    })
-  );
-
-  return starships;
-};
-
-export const searchStarships = async (query: string) => {
-  if (!query) return [];
-  const url =
-    query && query.trim() !== ""
-      ? `https://swapi.py4e.com/api/starships/?search=${query}`
-      : `https://swapi.py4e.com/api/starships/`;
-
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Failed to search starships");
-
-  const data = await res.json();
-  return data.results;
-};
-
 export function parseCrew(crewStr: string): [number, number] {
   if (!crewStr || crewStr.toLowerCase() === "unknown") return [0, Infinity];
 
