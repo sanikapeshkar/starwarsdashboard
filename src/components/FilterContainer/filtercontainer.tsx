@@ -2,67 +2,69 @@
 
 import { useDebounce } from "use-debounce";
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { searchStarships } from "@/lib/services/starships.service";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  applyFilters,
+  searchStarships,
+} from "@/lib/services/starships.service";
 import { useAtom } from "jotai";
-import { starShipsAtom } from "@/lib/atoms/starSelection";
-import { Card ,CardContent, CardHeader, CardTitle} from "../ui/card";
+import { filterSettingsAtom, starShipsAtom } from "@/lib/atoms/starSelection";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import {   Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "../ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectValue,
+  SelectItem,
+} from "../ui/select";
 import { Button } from "../ui/button";
-
-
-const hyperdriveOptions = ["Any", "0.5", "1.0", "2.0", "4.0", "10.0"];
-const crewOptions = ["Any", "1", "2-4", "5-10", "11-100", "100+"];
+import { crewOptions, hyperdriveOptions } from "./filtercontainer.types";
 
 export default function FiltersCard() {
   const [_, setStarships] = useAtom(starShipsAtom);
+  const [filter, setFilterSettings] = useAtom(filterSettingsAtom);
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 400); 
-
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 800);
   const [hyperdrive, setHyperdrive] = useState("Any");
   const [crew, setCrew] = useState("Any");
+  const queryClient = useQueryClient();
+  const [clearTrigger, setClearTrigger] = useState(0);
 
   const { data } = useQuery({
-    queryKey: ["search", debouncedSearchTerm],
+    queryKey: ["search", debouncedSearchTerm, clearTrigger],
     queryFn: () => searchStarships(debouncedSearchTerm),
-    enabled: !!debouncedSearchTerm,
-     staleTime: 0, 
+    staleTime: 0,
+    enabled: true,
   });
 
-  const applyFilters = (starships: any[]) => {
-    return starships.filter((ship) => {
-      const matchesHyperdrive =
-        hyperdrive === "Any" || ship.hyperdrive_rating === hyperdrive;
-
-      const crewCount = parseInt(ship.crew.replace(/[^0-9]/g, "")) || 0;
-
-      const matchesCrew =
-        crew === "Any" ||
-        (crew === "1" && crewCount === 1) ||
-        (crew === "2-4" && crewCount >= 2 && crewCount <= 4) ||
-        (crew === "5-10" && crewCount >= 5 && crewCount <= 10) ||
-        (crew === "11-100" && crewCount > 10 && crewCount <= 100) ||
-        (crew === "100+" && crewCount > 100);
-
-      return matchesHyperdrive && matchesCrew;
-    });
-  };
-
   useEffect(() => {
+
     if (data && Array.isArray(data)) {
-      const filtered = applyFilters(data);
+      const filtered = applyFilters(data, {
+        hyperdriveRating: hyperdrive,
+        crewSizeRange: crew,
+      });
       setStarships(filtered);
     }
-  }, [data,hyperdrive, crew, setStarships]);
+  }, [data, crew, hyperdrive, setStarships]);
 
   const handleClear = () => {
     setSearchTerm("");
     setHyperdrive("Any");
     setCrew("Any");
-    setStarships([]);
+    queryClient.invalidateQueries({ queryKey: ["search"] });
+    setClearTrigger((prev) => prev + 1);
   };
+
+  function onHyperdriveChange(value: string) {
+    setHyperdrive(value);
+  }
+
+  function onCrewChange(value: string) {
+    setCrew(value);
+  }
 
   return (
     <Card className="m-4 w-[90%] max-w-6xl mx-auto mb-6">
@@ -71,7 +73,9 @@ export default function FiltersCard() {
       </CardHeader>
       <CardContent className="flex gap-4">
         <div className="flex-1">
-          <Label htmlFor="search" className="mb-2">Search</Label>
+          <Label htmlFor="search" className="mb-2">
+            Search
+          </Label>
           <Input
             id="search"
             placeholder="e.g. Millennium Falcon"
@@ -79,38 +83,41 @@ export default function FiltersCard() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-
         <div className="flex-1 flex gap-2">
           <div className="flex-1">
             <Label className="mb-2">Hyperdrive Rating</Label>
-            <Select value={hyperdrive} onValueChange={setHyperdrive}>
+            <Select value={hyperdrive} onValueChange={onHyperdriveChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Select rating" />
               </SelectTrigger>
               <SelectContent>
                 {hyperdriveOptions.map((option) => (
-                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-
           <div className="flex-1">
             <Label className="mb-2">Crew Size</Label>
-            <Select value={crew} onValueChange={setCrew}>
+            <Select value={crew} onValueChange={onCrewChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Select crew size" />
               </SelectTrigger>
               <SelectContent>
                 {crewOptions.map((option) => (
-                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-
           <div className="col-span-1 md:col-span-3 text-right flex items-end">
-            <Button variant="outline" onClick={handleClear}>Clear Filters</Button>
+            <Button variant="outline" onClick={handleClear}>
+              Clear Filters
+            </Button>
           </div>
         </div>
       </CardContent>

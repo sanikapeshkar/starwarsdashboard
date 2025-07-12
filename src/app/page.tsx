@@ -1,7 +1,6 @@
 import ComparisonGrid from "@/components/ComparisonGrid/ComparisonGrid";
 import FiltersCard from "@/components/FilterContainer/filtercontainer";
 import { Header } from "@/components/Header/header";
-import Pagination from "@/components/Pagination/pagination";
 import { StarShipTable } from "@/components/Table/StarShipTable";
 import TabSwitcher from "@/components/Tabs/tabswitcher";
 
