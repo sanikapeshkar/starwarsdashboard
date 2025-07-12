@@ -94,4 +94,4 @@ Feel free to fork the repo and submit a PR.
 
 ## 📄 License
 
-MIT © 2025 — [Your Name](https://github.com/your-username)
+MIT © 2025 — [Your Name](https://github.com/sanikapeshkar)
